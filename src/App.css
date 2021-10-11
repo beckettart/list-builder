@@ -1,5 +1,9 @@
+button * {
+  pointer-events: none;
+}
+
 .App {
-  text-align: center;
+  text-align: left;
 }
 
 .App-logo {
