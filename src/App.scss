@@ -1,0 +1,162 @@
+// Colors
+$black: #000;
+$blue: #1957AB;
+$blueDark: #093477;
+$blueLight: #bddaff;
+$orange: #ffa744;
+$reactCyan: #61dafb;
+$reactNavy: #282c34;
+$red: #a91a2c;
+$redDark: #4d010a;
+$redLight: #fff1f2;
+$white: #fff;
+
+// Font Weights
+$normal: 400;
+$bold: 700;
+$semi-bold: 600;
+
+// Miscellaneous
+$button-transition: 0.2s linear;
+
+body {
+  color: $black;
+  font-size: 10px;
+  line-height: 1.6;
+
+  * {
+    font-size: 1rem;
+  }
+}
+
+button {
+  cursor: pointer;
+  text-align: center;
+  transition: $button-transition;
+
+  * {
+    pointer-events: none;
+  }
+}
+
+fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  font-size: 2rem;
+  margin: 0 0 1rem;
+}
+
+label {
+  display: block;
+  margin: 0 0 0.25rem 0;
+}
+
+.app {
+  margin: 0 auto;
+  max-width: 80rem;
+  padding: 1.25rem;
+}
+
+.app-logo {
+  height: 40vmin;
+  margin: 0 auto;
+  pointer-events: none;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: app-logo-spin infinite 20s linear;
+  }
+}
+
+.app-header {
+  align-items: center;
+  background-color: $reactNavy;
+  color: $white;
+  display: flex;
+  flex-direction: column;
+  font-size: calc(10px + 2vmin);
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.app-link {
+  color: $reactCyan;
+}
+
+.button--remove-item {
+  background-color: $redLight;
+  border: 2px solid $red;
+  color: $red;
+  line-height: 1.2;
+
+  &:hover,
+  &:focus {
+    background-color: $red;
+    border-color: $redDark;
+    color: $white;
+  }
+}
+
+.fieldset--add-item {
+  & > * {
+    display: inline-block;
+  }
+
+  .input-field {
+    margin-right: 1rem;
+  }
+}
+
+.fieldset--list-controls {
+  margin: 0 0 1.75rem 0;
+}
+
+.input-button {
+  background-color: $blue;
+  border: 2px solid $blueDark;
+  color: $white;
+  letter-spacing: 0.0625rem;
+  margin: 0 0.75rem 0 0;
+  padding: 0.25rem 0.5rem;
+  transition: $button-transition;
+
+  &:hover,
+  &:focus {
+    background-color: $blueLight;
+    color: $black;
+  }
+}
+
+.input-field {
+  margin: 1.5rem 0;
+
+  &:first-of-type {
+    margin-top: 0;
+  }
+}
+
+.list-item {
+  margin: 0 0 0.75rem;
+
+  * {
+    font-size: 1.25rem;
+    font-weight: $semi-bold;
+    margin: 0 0.5rem 0 0;
+  }
+}
+
+.message--error {
+  color: $red;
+}
+
+@keyframes app-logo-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
