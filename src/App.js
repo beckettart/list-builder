@@ -70,8 +70,11 @@ class App extends React.Component {
 
     this.setState({
       disableClearButton: true,
+      disableRedoButton: true,
       disableResetButton: false,
       disableSortButtons: true,
+      disableUndoButton: false,
+      error: '',
       items: [],
       redoHistory: []
     });
@@ -110,7 +113,10 @@ class App extends React.Component {
 
     this.setState({
       disableClearButton: false,
+      disableRedoButton: true,
       disableResetButton: true,
+      disableUndoButton: false,
+      error: '',
       items: this.defaultItems,
       redoHistory: []
     });
@@ -122,6 +128,7 @@ class App extends React.Component {
     this.setState({
       disableRedoButton: true,
       disableUndoButton: false,
+      error: '',
       items: this.state.items.reverse(),
       redoHistory: []
     });
@@ -133,6 +140,7 @@ class App extends React.Component {
     this.setState({
       disableRedoButton: true,
       disableUndoButton: false,
+      error: '',
       items: this.state.items.sort(),
       redoHistory: []
     });
@@ -153,6 +161,7 @@ class App extends React.Component {
         disableSortButtons: !newListLength,
         disableRedoButton: !redoHistory.length,
         disableUndoButton: false,
+        error: '',
         items: newList,
         redoHistory: redoHistory,
         undoHistory: [...this.state.undoHistory, oldList]
@@ -175,6 +184,7 @@ class App extends React.Component {
         disableSortButtons: !newListLength,
         disableRedoButton: false,
         disableUndoButton: !undoHistory.length,
+        error: '',
         items: newList,
         redoHistory: [...this.state.redoHistory, oldList],
         undoHistory: undoHistory
@@ -236,7 +246,13 @@ class App extends React.Component {
 
 function Button(props) {
   return (
-    <button aria-label={props.ariaLabel} className={props.className} onClick={() => props.onClick(props.target)}>{props.content}</button>
+    <button
+      aria-label={props.ariaLabel}
+      className={props.className}
+      onClick={() => props.onClick(props.target)}
+    >
+      {props.content}
+    </button>
   );
 }
 
@@ -270,23 +286,102 @@ class Form extends React.Component {
     return (
       <form>
         <fieldset>
-          <InputField inputName={'first-name'} inputValue={this.props.firstName} onChange={this.props.itemInputUpdate} stateUpdate={'firstName'} labelClass={''} labelValue={'First Name'} type={'text'} wrapperClass={this.classPrefix + 'first-name'} />
-          <InputField inputName={'last-name'} inputValue={this.props.lastName} onChange={this.props.itemInputUpdate} stateUpdate={'lastName'} labelValue={'Last Name'} type={'text'} wrapperClass={this.classPrefix + 'last-name'} />
-          <InputField inputName={'list-title'} inputValue={this.props.listTitle} onChange={this.props.itemInputUpdate} stateUpdate={'listTitle'} labelValue={'List Title'} type={'text'} wrapperClass={this.classPrefix + 'list-title'} />
+          <InputField
+            inputName={'first-name'}
+            inputValue={this.props.firstName}
+            onChange={this.props.itemInputUpdate}
+            stateUpdate={'firstName'}
+            labelClass={''}
+            labelValue={'First Name'}
+            type={'text'}
+            wrapperClass={this.classPrefix + 'first-name'}
+          />
+          <InputField
+            inputName={'last-name'}
+            inputValue={this.props.lastName}
+            onChange={this.props.itemInputUpdate}
+            stateUpdate={'lastName'}
+            labelValue={'Last Name'}
+            type={'text'}
+            wrapperClass={this.classPrefix + 'last-name'}
+          />
+          <InputField
+            inputName={'list-title'}
+            inputValue={this.props.listTitle}
+            onChange={this.props.itemInputUpdate}
+            stateUpdate={'listTitle'}
+            labelValue={'List Title'} type={'text'}
+            wrapperClass={this.classPrefix + 'list-title'}
+          />
         </fieldset>
         <fieldset className={'fieldset--list-controls'}>
           <fieldset className={'fieldset--add-item'}>
-            <InputField inputName={'list-item'} inputValue={this.props.newItem} keyboardCallback={this.props.itemSubmit} onChange={this.props.itemInputUpdate} onKeyPress={this.props.itemSubmitKeyboard} stateUpdate={'newItem'} labelValue={'New Item'} type={'text'} wrapperClass={this.classPrefix + 'list-item'} />
-            <Input className={this.inputPrefix + 'add-item'} onClick={this.props.itemSubmit} type={'button'} value={'Add Item'} />
+            <InputField
+              inputName={'list-item'}
+              inputValue={this.props.newItem}
+              keyboardCallback={this.props.itemSubmit}
+              onChange={this.props.itemInputUpdate}
+              onKeyPress={this.props.itemSubmitKeyboard}
+              stateUpdate={'newItem'}
+              labelValue={'New Item'}
+              type={'text'}
+              wrapperClass={this.classPrefix + 'list-item'}
+            />
+            <Input
+              className={this.inputPrefix + 'add-item'}
+              onClick={this.props.itemSubmit}
+              type={'button'}
+              value={'Add Item'}
+            />
           </fieldset>
-          <Input className={sortAbcClasses} onClick={this.props.sortAction} type={'button'} value={'Sort Alphabetically'} />
-          <Input className={reverseClasses} onClick={this.props.reverseAction} type={'button'} value={'Reverse Order'} />
-          <Input ariaDisabled={this.props.disableUndoButton} className={undoClasses} onClick={this.props.undoAction} type={'button'} value={'Undo'} />
-          <Input ariaDisabled={this.props.disableRedoButton} className={redoClasses} onClick={this.props.redoAction} type={'button'} value={'Redo'} />
-          <Input ariaDisabled={this.props.disableClearButton} className={clearClasses} onClick={this.props.clearAction} type={'button'} value={'Clear List'} />
-          <Input ariaDisabled={this.props.disableResetButton} className={resetClasses} onClick={this.props.resetAction} type={'button'} value={'Reset List'} />
+          <Input
+            className={sortAbcClasses}
+            onClick={this.props.sortAction}
+            type={'button'}
+            value={'Sort Alphabetically'}
+          />
+          <Input
+            className={reverseClasses}
+            onClick={this.props.reverseAction}
+            type={'button'}
+            value={'Reverse Order'}
+          />
+          <Input
+            ariaDisabled={this.props.disableUndoButton}
+            className={undoClasses}
+            clickDisabled={this.props.disableUndoButton}
+            onClick={this.props.undoAction}
+            type={'button'}
+            value={'Undo'}
+          />
+          <Input
+            ariaDisabled={this.props.disableRedoButton}
+            className={redoClasses}
+            clickDisabled={this.props.disableRedoButton}
+            onClick={this.props.redoAction}
+            type={'button'}
+            value={'Redo'}
+          />
+          <Input
+            ariaDisabled={this.props.disableClearButton}
+            className={clearClasses}
+            clickDisabled={this.props.disableClearButton}
+            onClick={this.props.clearAction}
+            type={'button'}
+            value={'Clear List'}
+          />
+          <Input
+            ariaDisabled={this.props.disableResetButton}
+            className={resetClasses}
+            clickDisabled={this.props.disableResetButton}
+            onClick={this.props.resetAction}
+            type={'button'}
+            value={'Reset List'}
+          />
         </fieldset>
-        <div className={'message'}><Text className={'message--error'} value={this.props.error} /></div>
+        <div className={'message'}>
+          <Text className={'message--error'} value={this.props.error} />
+        </div>
       </form>
     );
   }
@@ -300,19 +395,50 @@ function Heading(props) {
 
 function Input(props) {
   return (
-    <input aria-disabled={props.ariaDisabled} className={props.className} onChange={props.onChange ? (e) => props.onChange(props.stateUpdate, e.target.value): null} onClick={props.onClick} onKeyPress={props.onKeyPress ? (e) => props.onKeyPress(props.keyboardCallback, e) : null} type={props.type} value={props.value} />
+    <input
+      aria-disabled={props.ariaDisabled}
+      className={props.className}
+      onChange={props.onChange ?
+        (e) => props.onChange(props.stateUpdate, e.target.value) :
+        null
+      }
+      onClick={props.onClick && !props.clickDisabled ?
+        (e) => props.onClick() :
+        null
+      }
+      onKeyPress={props.onKeyPress ?
+        (e) => props.onKeyPress(props.keyboardCallback, e) :
+        null
+      }
+      type={props.type}
+      value={props.value}
+    />
   );
 }
 
 function InputField(props) {
   const labelClasses = 'input-label' + props.labelClass;
-  const label = props.labelValue ? <Label className={labelClasses.trim()} htmlFor={props.inputName} value={props.labelValue}/> : '';
+  const label = props.labelValue ?
+    <Label
+      className={labelClasses.trim()}
+      htmlFor={props.inputName}
+      value={props.labelValue}
+    /> :
+    '';
   const wrapperClasses = 'input-field ' + props.wrapperClass;
 
   return (
     <div className={wrapperClasses.trim()}>
       {label}
-      <Input keyboardCallback={props.keyboardCallback} name={props.inputName} onChange={props.onChange} onKeyPress={props.onKeyPress} stateUpdate={props.stateUpdate} type={props.type} value={props.inputValue} />
+      <Input
+        keyboardCallback={props.keyboardCallback}
+        name={props.inputName}
+        onChange={props.onChange}
+        onKeyPress={props.onKeyPress}
+        stateUpdate={props.stateUpdate}
+        type={props.type}
+        value={props.inputValue}
+      />
     </div>
   );
 }
@@ -333,7 +459,13 @@ class List extends React.Component {
 
   createItem(item) {
     let itemKey = this.createUniqueKey(item);
-    return <ListItem className={'list-item list-item--' + itemKey} itemId={itemKey} key={itemKey} removeAction={this.props.removeAction} value={item} />
+    return <ListItem
+      className={'list-item list-item--' + itemKey}
+      itemId={itemKey}
+      key={itemKey}
+      removeAction={this.props.removeAction}
+      value={item}
+    />
   }
 
   createUniqueKey(value) {
@@ -384,8 +516,14 @@ function ListHeading(props) {
 function ListItem(props) {
   return (
     <li className={props.className} key={props.itemId}>
+      <Button
+        ariaLabel={'Remove ' + props.value}
+        className={'button--remove-item'}
+        content={'X'}
+        onClick={props.removeAction}
+        target={props.value}
+      />
       <Text value={props.value} />
-      <Button className={'button--remove-item'} content={'X'} ariaLabel={'Remove ' + props.value} onClick={props.removeAction} target={props.value} />
     </li>
   );
 }
