@@ -260,7 +260,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <main className='app'>
+      <main className={'app'}>
         <div className={'component--list'}>
           <ListHeading
             firstName={this.state.firstName}
