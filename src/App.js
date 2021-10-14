@@ -6,6 +6,8 @@ class App extends React.Component {
     super(props);
     this.addItem = this.addItem.bind(this);
     this.clearList = this.clearList.bind(this);
+    this.createInputId = this.createInputId.bind(this);
+    this.createUniqueId = this.createUniqueId.bind(this);
     this.defaultItems = ['Bread', 'Milk', 'Eggs'];
     this.redo = this.redo.bind(this);
     this.removeItem = this.removeItem.bind(this);
@@ -31,6 +33,57 @@ class App extends React.Component {
       redoHistory: [],
       undoHistory: []
     };
+  }
+
+  uniqueIds = [];
+  uniqueKeys = [];
+
+  cleanId(value) {
+    value = value.toLowerCase();
+    return value.replace(/\W+/g, '-');
+  }
+
+  createInputId(props) {
+    let genericId;
+
+    if (props.inputName) {
+      genericId = props.inputName;
+    }
+    else if (props.labelValue) {
+      genericId = this.props.labelValue;
+    }
+    else {
+      genericId = props.type ? 'input--' + props.type : 'input';
+    }
+
+    return this.createUniqueId(props.uniqueIdsArrayName, genericId);
+  }
+
+  createUniqueId(arrayName, value) {
+    window.console.log(arrayName);
+    window.console.log(value);
+    const array = this.getPrivateVar(arrayName);
+    let baseId = this.cleanId(value);
+    let uid = 1;
+    let uniqueId = baseId + '--' + uid;
+
+    while (array.includes(uniqueId)) {
+      uniqueId = baseId + '--' + uid;
+      uid++;
+    }
+
+    return uniqueId;
+  }
+
+  getPrivateVar(name) {
+    switch(name) {
+      case 'uniqueIds':
+        return this.uniqueIds;
+      case 'uniqueKeys':
+        return this.uniqueKeys;
+      default:
+        return null;
+    }
   }
 
   addItem() {
@@ -217,6 +270,9 @@ class App extends React.Component {
           />
           <Form
             clearAction={this.clearList}
+            createInputId={this.createInputId}
+            createUniqueId={this.createUniqueId}
+            uniqueIdsArrayName={'uniqueIds'}
             disableClearButton={this.state.disableClearButton}
             disableRedoButton={this.state.disableRedoButton}
             disableResetButton={this.state.disableResetButton}
@@ -235,6 +291,8 @@ class App extends React.Component {
             undoAction={this.undo}
           />
           <List
+            createUniqueKey={this.createUniqueId}
+            uniqueKeysArrayName={'uniqueKeys'}
             items={this.state.items}
             removeAction={this.removeItem}
           />
@@ -287,6 +345,8 @@ class Form extends React.Component {
       <form>
         <fieldset>
           <InputField
+            createInputId={this.props.createInputId}
+            createUniqueId={this.props.createUniqueId}
             inputName={'first-name'}
             inputValue={this.props.firstName}
             onChange={this.props.itemInputUpdate}
@@ -294,29 +354,38 @@ class Form extends React.Component {
             labelClass={''}
             labelValue={'First Name'}
             type={'text'}
+            uniqueIdsArrayName={'uniqueIds'}
             wrapperClass={this.classPrefix + 'first-name'}
           />
           <InputField
+            createInputId={this.props.createInputId}
+            createUniqueId={this.props.createUniqueId}
             inputName={'last-name'}
             inputValue={this.props.lastName}
             onChange={this.props.itemInputUpdate}
             stateUpdate={'lastName'}
             labelValue={'Last Name'}
             type={'text'}
+            uniqueIdsArrayName={'uniqueIds'}
             wrapperClass={this.classPrefix + 'last-name'}
           />
           <InputField
+            createInputId={this.props.createInputId}
+            createUniqueId={this.props.createUniqueId}
             inputName={'list-title'}
             inputValue={this.props.listTitle}
             onChange={this.props.itemInputUpdate}
             stateUpdate={'listTitle'}
             labelValue={'List Title'} type={'text'}
+            uniqueIdsArrayName={'uniqueIds'}
             wrapperClass={this.classPrefix + 'list-title'}
           />
         </fieldset>
         <fieldset className={'fieldset--list-controls'}>
           <fieldset className={'fieldset--add-item'}>
             <InputField
+              createInputId={this.props.createInputId}
+              createUniqueId={this.props.createUniqueId}
               inputName={'list-item'}
               inputValue={this.props.newItem}
               keyboardCallback={this.props.itemSubmit}
@@ -325,6 +394,7 @@ class Form extends React.Component {
               stateUpdate={'newItem'}
               labelValue={'New Item'}
               type={'text'}
+              uniqueIdsArrayName={'uniqueIds'}
               wrapperClass={this.classPrefix + 'list-item'}
             />
             <Input
@@ -394,10 +464,21 @@ function Heading(props) {
 }
 
 function Input(props) {
+  let id;
+
+  if (props.id) {
+    id = props.id;
+  }
+  else if (props.createInputId) {
+    id = props.createInputId(props);
+  }
+
   return (
     <input
       aria-disabled={props.ariaDisabled}
       className={props.className}
+      id={id}
+      name={props.inputName}
       onChange={props.onChange ?
         (e) => props.onChange(props.stateUpdate, e.target.value) :
         null
@@ -417,22 +498,26 @@ function Input(props) {
 }
 
 function InputField(props) {
+  const wrapperClasses = 'input-field ' + props.wrapperClass;
   const labelClasses = 'input-label' + props.labelClass;
-  const label = props.labelValue ?
+  let label;
+  let uniqueId = props.createInputId ? props.createInputId(props) : '';
+
+  label = props.labelValue ?
     <Label
       className={labelClasses.trim()}
-      htmlFor={props.inputName}
+      htmlFor={uniqueId}
       value={props.labelValue}
     /> :
     '';
-  const wrapperClasses = 'input-field ' + props.wrapperClass;
 
   return (
     <div className={wrapperClasses.trim()}>
       {label}
       <Input
         keyboardCallback={props.keyboardCallback}
-        name={props.inputName}
+        id={uniqueId}
+        inputName={props.inputName}
         onChange={props.onChange}
         onKeyPress={props.onKeyPress}
         stateUpdate={props.stateUpdate}
@@ -452,13 +537,8 @@ function Label(props) {
 class List extends React.Component {
   uniqueKeys = [];
 
-  cleanKey(value) {
-    value = value.toLowerCase();
-    return value.replace(/\W+/g, '-');
-  }
-
   createItem(item) {
-    let itemKey = this.createUniqueKey(item);
+    let itemKey = this.props.createUniqueKey(this.props.uniqueKeysArrayName, item);
     return <ListItem
       className={'list-item list-item--' + itemKey}
       itemId={itemKey}
@@ -466,19 +546,6 @@ class List extends React.Component {
       removeAction={this.props.removeAction}
       value={item}
     />
-  }
-
-  createUniqueKey(value) {
-    let baseKey = this.cleanKey(value);
-    let uk = 2;
-    let uniqueKey = baseKey;
-
-    while (this.uniqueKeys.includes(uniqueKey)) {
-      uniqueKey = baseKey + '--' + uk;
-      uk++;
-    }
-
-    return uniqueKey;
   }
 
   render() {
